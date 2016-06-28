@@ -3,10 +3,10 @@ require 'test_helper'
 class UserTest < ActiveSupport::TestCase
   def setup
     @user = User.new(name: "Example User", email: "user@example.com",
-                     password: "foobar", password_confirmation: "foobar") 
+                     password: "foobar", password_confirmation: "foobar")
   end
 
-  test "should be valid" do 
+  test "should be valid" do
     assert @user.valid?
   end
 
@@ -25,7 +25,7 @@ class UserTest < ActiveSupport::TestCase
     assert_not @user.valid?
   end
 
-  test "email should not be too long" do 
+  test "email should not be too long" do
     @user.email = "a" * 244 + "@example.com"
     assert_not @user.valid?
   end
@@ -40,7 +40,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
 
-  test "email validation should reject invalid addresses" do 
+  test "email validation should reject invalid addresses" do
     invalid_addresses = %w[user@example,com user_at_foo.org user.name@example.
                                foo@bar_baz.com foo@bar+baz.com]
     invalid_addresses.each do |invalid_address|
@@ -57,7 +57,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
 
-  test "password should be present (nonblank)" do 
+  test "password should be present (nonblank)" do
     @user.password = @user.password_confirmation = "a" * 5
     assert_not @user.valid?
   end
@@ -66,12 +66,23 @@ class UserTest < ActiveSupport::TestCase
     assert_not @user.authenticated?(:remember, '')
   end
 
-  test "assosiated microposts should be destroyed" do 
+  test "assosiated microposts should be destroyed" do
     @user.save
     @user.microposts.create!(content: "Lorem Ipsum")
-    assert_difference 'Micropost.count', -1 do 
+    assert_difference 'Micropost.count', -1 do
       @user.destroy
     end
+  end
+
+  test "should follow and unfollow user" do
+    michael = users(:michael)
+    archer  = users(:archer)
+    assert_not michael.following?(archer)
+    michael.follow(archer)
+    assert michael.following?(archer)
+    assert archer.followers.include?(michael)
+    michael.unfollow(archer)
+    assert_not michael.following?(archer)
   end
 
 
